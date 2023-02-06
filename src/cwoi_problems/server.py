@@ -65,10 +65,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Run a server to provide web-based ui')
     parser.add_argument('cwoi', type=str,
-                        help='For example, https://local.cwoi.com.cn:8443, without a slash ending')
+                        help='for example, https://local.cwoi.com.cn:8443, without a slash ending')
     parser.add_argument('database', type=pathlib.Path,
                         help='where your database is created')
+    parser.add_argument('--port', type=int, default=5000,
+                        help='where the server is opened')
     args = parser.parse_args()
     DATABASE = args.database
     CWOI_PREFIX = args.cwoi
-    app.run()
+    app.run(port=args.port)
