@@ -38,7 +38,7 @@ def close_connection(exception):
 
 
 @app.route('/')
-@cache.cached(timeout=86400)
+@cache.cached()
 def index():
     '''
     index page shows all the contests and problems
