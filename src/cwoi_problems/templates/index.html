@@ -7,10 +7,10 @@
     </head>
     <body>
         {% for i in contests %}
-        <h2>{{contests[i]['display_id']}} <a href="{{ cwoi }}/contests/{{ contests[i]['display_id'] }}">{{ contests[i]['title'] }}</a></h2>
+        <h2>{{contests[i]['display_id']}} <a href="{{ cwoi }}/contest/{{ contests[i]['display_id'] }}">{{ contests[i]['title'] }}</a></h2>
         <ol type='A'>
             {% for j in contests[i].problems %}
-            <li><a href="{{ cwoi }}/contests/{{ contests[i]['display_id'] }}/problems/{{ j }}">
+            <li><a href="{{ cwoi }}/contest/{{ contests[i]['display_id'] }}/problems/{{ j }}">
                     {{ contests[i].problems[j] }}
                 </a></li>
                 {% endfor %}
