@@ -19,6 +19,7 @@ def build_html(data: Path, dist: Path, cwoi: str):
         contests = json.load(inf)
     with (dist / "index.html").open("w") as ouf:
         ouf.write(template.render(contests=contests, cwoi=cwoi))
+    logger.info(f"Written to {str(dist / "index.html")}.")
 
 
 def main():
