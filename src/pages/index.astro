@@ -2,7 +2,7 @@
 import contests from "../data/contests.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const CWOI_HOST: string = import.meta.env.CWOI_HOST || "https://example.com";
+const { CWOI_HOST } = Astro.locals.runtime.env;
 ---
 
 <BaseLayout>

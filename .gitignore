@@ -2,5 +2,6 @@ __pycache__/
 venv/
 dist/
 .env.local
+.dev.vars
 node_modules/
 .astro/
