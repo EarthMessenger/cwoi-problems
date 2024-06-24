@@ -1,5 +1,6 @@
 __pycache__/
 venv/
 dist/
-data/
-env.sh
+.env.local
+node_modules/
+.astro/

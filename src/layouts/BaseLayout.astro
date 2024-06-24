@@ -1,0 +1,40 @@
+---
+const title = Astro.props.title;
+---
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <footer>
+      <hr />
+      <p>
+        原始碼：<a href="https://github.com/EarthMessenger/cwoi-problems"
+          >https://github.com/EarthMessenger/cwoi-problems</a
+        >
+      </p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  body {
+    width: 90%;
+    margin: auto;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px dashed gray;
+  }
+
+  footer {
+    text-align: right;
+    color: gray;
+  }
+</style>
