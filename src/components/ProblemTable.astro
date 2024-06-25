@@ -1,7 +1,7 @@
 ---
 import contests from "../data/contests.json";
 
-const { CWOI_HOST } = Astro.locals.runtime.env;
+const { CWOI_HOST } = import.meta.env;
 
 const solvedProblems: Set<string> = new Set(Astro.props.solvedProblems || []);
 ---

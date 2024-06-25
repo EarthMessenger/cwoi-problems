@@ -29,7 +29,7 @@ const getIdFromHandle = async (cwoiHost: string, handle: string) => {
 };
 
 const getSolvedProblems = async (handle: string) => {
-  const { CWOI_HOST, CWOI_NAME, CWOI_PASSWORD } = Astro.locals.runtime.env;
+  const { CWOI_HOST, CWOI_NAME, CWOI_PASSWORD } = import.meta.env;
   const token = await getToken(CWOI_HOST, CWOI_NAME, CWOI_PASSWORD);
   const id = await getIdFromHandle(CWOI_HOST, handle);
 
