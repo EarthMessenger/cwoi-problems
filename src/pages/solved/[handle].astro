@@ -1,0 +1,92 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProblemTable from "../../components/ProblemTable.astro";
+
+const getToken = async (
+  cwoiHost: string,
+  cwoiName: string,
+  cwoiPassword: string,
+) => {
+  return fetch(`${cwoiHost}/api/user/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      login: cwoiName,
+      password: cwoiPassword,
+      remember: true,
+    }),
+  })
+    .then((r) => r.json())
+    .then((r) => r.token);
+};
+
+const getIdFromHandle = async (cwoiHost: string, handle: string) => {
+  return fetch(`${cwoiHost}/api/user/info/handle/${handle}`)
+    .then((r) => r.json())
+    .then((r) => r._id);
+};
+
+const getSolvedProblems = async (handle: string) => {
+  const { CWOI_HOST, CWOI_NAME, CWOI_PASSWORD } = Astro.locals.runtime.env;
+  const token = await getToken(CWOI_HOST, CWOI_NAME, CWOI_PASSWORD);
+  const id = await getIdFromHandle(CWOI_HOST, handle);
+
+  if (!id) throw new Error("User not found.");
+
+  return fetch(`${CWOI_HOST}/api/user/${id}/solvedProblems`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((r) => r.json())
+    .then((r) =>
+      r
+        .filter((p) => !p.cachedUrl.startsWith("/problem/"))
+        .map((p) => {
+          const part = p.cachedUrl.split("/");
+          return `${part[2]}${part[4]}`;
+        }),
+    )
+    .catch((e) => {
+      console.error(e);
+      throw new Error("Can't read the user's solvedProblems.");
+    });
+};
+
+const { handle } = Astro.params;
+let errorMessage: unknown;
+const solvedProblems = await getSolvedProblems(handle).catch((e) => {
+  errorMessage = e;
+});
+---
+
+<BaseLayout>
+  <form id="handle-form">
+    <input placeholder="handle" id="handle-input" value={handle} />
+  </form>
+  {errorMessage instanceof Error && <p class="red">{errorMessage.message}</p>}
+  <ProblemTable solvedProblems={solvedProblems} />
+</BaseLayout>
+
+<style>
+  .red {
+    color: red;
+  }
+
+  input {
+    margin: 0.5em 0;
+  }
+</style>
+
+<script>
+  const form = document.getElementById("handle-form") as HTMLFormElement;
+  const input = document.getElementById("handle-input") as HTMLInputElement;
+  form.onsubmit = (ev) => {
+    console.log(input.value);
+    if (input.value === "") location.href = "/";
+    else location.href = `/solved/${input.value}`;
+    return false;
+  };
+</script>

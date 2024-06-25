@@ -1,89 +1,28 @@
 ---
-import contests from "../data/contests.json";
 import BaseLayout from "../layouts/BaseLayout.astro";
-
-const { CWOI_HOST } = Astro.locals.runtime.env;
+import ProblemTable from "../components/ProblemTable.astro";
 ---
 
 <BaseLayout>
-  <h1>CWOI Problems</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>比賽名稱</th>
-        <th>題目</th>
-      </tr>
-    </thead>
-    <tbody>
-      {
-        contests.map((c) => (
-          <>
-            <tr>
-              <th class="contest">
-                <a href={`${CWOI_HOST}/contest/${c.contestDisplayId}`}>
-                  {c.contestDisplayId}
-                  {c.contestTitle}
-                </a>
-              </th>
-              <td class="problems">
-                <table class="problem-table">
-                  <tr>
-                    {c.problems.map((p) => (
-                      <td>
-                        <a
-                          href={`${CWOI_HOST}/contest/${c.contestDisplayId}/problem/${p.displayId}`}
-                        >
-                          {p.displayId}. {p.problemTitle}
-                        </a>
-                      </td>
-                    ))}
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </>
-        ))
-      }
-    </tbody>
-  </table>
+  <form id="handle-form">
+    <input placeholder="handle" id="handle-input" />
+  </form>
+  <ProblemTable />
 </BaseLayout>
+
 <style>
-  .problem-table {
-    table-layout: fixed;
-    width: 100%;
-    border: none;
-  }
-
-  table,
-  th,
-  td {
-    border: 1px solid black;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    padding: 0.5em;
-  }
-
-  .problem-table tr td {
-    border: none;
-    border-right: 1px solid black;
-  }
-
-  .problem-table tr :last-child {
-    border: none;
-  }
-
-  .problems {
-    padding: 0;
-  }
-
-  .contest {
-    text-align: left;
+  input {
+    margin: 0.5em 0;
   }
 </style>
+
+<script>
+  const form = document.getElementById("handle-form") as HTMLFormElement;
+  const input = document.getElementById("handle-input") as HTMLInputElement;
+  form.onsubmit = (ev) => {
+    console.log(input.value);
+    if (input.value === "") location.href = "/";
+    else location.href = `/solved/${input.value}`;
+    return false;
+  };
+</script>

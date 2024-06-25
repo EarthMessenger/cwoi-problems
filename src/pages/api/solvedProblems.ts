@@ -34,8 +34,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
       'Authorization': `Bearer ${token}`
     }
   }).then((r) => r.json())
-    .then((r) => r.filter((p) => !p.cachedUrl.startsWith('/problem/')).map((p) => ({
-      url: p.cachedUrl,
-      title: p.cachedTitle,
-    }))).then((r) => Response.json(r));
+    .then((r) => r.filter((p) => !p.cachedUrl.startsWith('/problem/')).map((p) => {
+      const part = p.cachedUrl.split('/');
+      return {
+        contestId: part[2],
+        problemId: part[4],
+      };
+    })).then((r) => Response.json(r));
 }

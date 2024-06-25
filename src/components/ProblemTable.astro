@@ -1,0 +1,98 @@
+---
+import contests from "../data/contests.json";
+
+const { CWOI_HOST } = Astro.locals.runtime.env;
+
+const solvedProblems: Set<string> = new Set(Astro.props.solvedProblems || []);
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>比賽名稱</th>
+      <th>題目</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      contests.map((c) => (
+        <>
+          <tr>
+            <th class="contest">
+              <a href={`${CWOI_HOST}/contest/${c.contestDisplayId}`}>
+                {c.contestDisplayId}
+                {c.contestTitle}
+              </a>
+            </th>
+            <td class="problems">
+              <table class="problem-table">
+                <tr>
+                  {c.problems.map((p) => (
+                    <td
+                      class={
+                        solvedProblems.has(
+                          `${c.contestDisplayId}${p.displayId}`,
+                        ) && "accept"
+                      }
+                    >
+                      <a
+                        href={`${CWOI_HOST}/contest/${c.contestDisplayId}/problem/${p.displayId}`}
+                      >
+                        {p.displayId}. {p.problemTitle}
+                      </a>
+                    </td>
+                  ))}
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </>
+      ))
+    }
+  </tbody>
+</table>
+
+<style>
+  .problem-table {
+    table-layout: fixed;
+    width: 100%;
+    border: none;
+  }
+
+  table,
+  th,
+  td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    padding: 0.5em;
+  }
+
+  .problem-table tr td {
+    border: none;
+    border-right: 1px solid black;
+  }
+
+  .problem-table tr :last-child {
+    border: none;
+  }
+
+  .problems {
+    padding: 0;
+  }
+
+  .contest {
+    text-align: left;
+  }
+
+  .accept {
+    background-color: greenyellow;
+  }
+</style>
