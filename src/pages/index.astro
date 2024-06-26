@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProblemTable from "../components/ProblemTable.astro";
+
+Astro.response.headers.set('Cache-Control', 's-maxage=86400, stale-while-revalidate');
 ---
 
 <BaseLayout>
