@@ -4,11 +4,6 @@ import contests from "../data/contests.json";
 const { CWOI_HOST } = import.meta.env;
 
 const solvedProblems: Set<string> = new Set(Astro.props.solvedProblems || []);
-
-Astro.response.headers.set(
-  "Cache-Control",
-  "s-maxage=3600, stale-while-revalidate",
-);
 ---
 
 <table>

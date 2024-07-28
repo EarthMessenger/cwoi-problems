@@ -26,21 +26,16 @@ if (await getSession(Astro.request)) return Astro.redirect("/");
   const { signIn } = await import("auth-astro/client");
 
   const form1 = document.getElementById("form1") as HTMLFormElement;
-  const nameInput = document.getElementById(
-    "name-input",
-  ) as HTMLInputElement;
+  const nameInput = document.getElementById("name-input") as HTMLInputElement;
 
   form1.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const name = nameInput.value;
 
-    fetch(
-      `/api/requestChallenge?name=${encodeURIComponent(nameInput.value)}`,
-    )
+    fetch(`/api/requestChallenge?name=${encodeURIComponent(nameInput.value)}`)
       .then((r) => r.json())
       .then((r: CredentialSchema) => {
-        console.log(r);
         const step2 = document.createElement("div");
         const hint = document.createElement("p");
         hint.innerText = `請在 ${new Date(parseInt(r.expireTime)).toLocaleString()} 前，修改帳號 "${name}" 的格言，使之以字符串 "${r.challenge}" 開頭。`;

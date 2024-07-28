@@ -84,7 +84,6 @@ const solvedProblems = await getSolvedProblems(name).catch((e) => {
   const form = document.getElementById("name-form") as HTMLFormElement;
   const input = document.getElementById("name-input") as HTMLInputElement;
   form.onsubmit = (ev) => {
-    console.log(input.value);
     if (input.value === "") location.href = "/";
     else location.href = `/solved/${input.value}`;
     return false;
