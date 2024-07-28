@@ -6,7 +6,7 @@ import { getSession } from "auth-astro/server";
 if (await getSession(Astro.request)) return Astro.redirect("/");
 ---
 
-<BaseLayout>
+<BaseLayout title="登錄">
   <div id="step1">
     <form id="form1">
       <label>

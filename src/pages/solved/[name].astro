@@ -62,7 +62,7 @@ const solvedProblems = await getSolvedProblems(name).catch((e) => {
 });
 ---
 
-<BaseLayout>
+<BaseLayout title={`${name} 的做題`}>
   <form id="name-form">
     <input placeholder="名字" id="name-input" value={name} />
   </form>
