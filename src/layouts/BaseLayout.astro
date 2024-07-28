@@ -1,31 +1,54 @@
 ---
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+
 const title = Astro.props.title;
 ---
 
 <!doctype html>
-<html>
+<html lang="zh-hant">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
   </head>
   <body>
-    <h1>CWOI Problems</h1>
-    <hr />
-    <slot />
-    <footer>
-      <hr />
-      <p>
-        原始碼：<a href="https://github.com/EarthMessenger/cwoi-problems"
-          >https://github.com/EarthMessenger/cwoi-problems</a
-        >
-      </p>
-    </footer>
+    <header>
+      <a href="/">CWOI Problems</a>
+      <div>
+        {
+          session ? (
+            <>
+              <span id="username">{session.user.name}</span>
+              <span id="logout">註銷</span>
+            </>
+          ) : (
+            <a href="/login">登錄</a>
+          )
+        }
+      </div>
+    </header>
+    <main>
+      <slot />
+      <footer>
+        <hr />
+        <p>
+          原始碼：<a href="https://github.com/EarthMessenger/cwoi-problems"
+            >https://github.com/EarthMessenger/cwoi-problems</a
+          >
+        </p>
+      </footer>
+    </main>
   </body>
 </html>
 
 <style>
   body {
+    margin: 0;
+  }
+
+  main {
     width: 90%;
     margin: auto;
   }
@@ -39,4 +62,33 @@ const title = Astro.props.title;
     text-align: right;
     color: gray;
   }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #eee;
+    padding: 1em;
+    margin-bottom: 1em;
+  }
+
+  header a {
+    color: black;
+    text-decoration: none;
+  }
+  header a:visited {
+    color: black;
+  }
+
+  #username {
+    margin-right: 1em;
+  }
 </style>
+
+<script>
+  import { signOut } from "auth-astro/client";
+  const logout = document.getElementById("logout");
+  logout.onclick = (ev) => {
+    signOut();
+  };
+</script>

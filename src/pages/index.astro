@@ -2,12 +2,15 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProblemTable from "../components/ProblemTable.astro";
 
-Astro.response.headers.set('Cache-Control', 's-maxage=86400, stale-while-revalidate');
+Astro.response.headers.set(
+  "Cache-Control",
+  "s-maxage=86400, stale-while-revalidate",
+);
 ---
 
 <BaseLayout>
-  <form id="handle-form">
-    <input placeholder="handle" id="handle-input" />
+  <form id="name-form">
+    <input placeholder="名字" id="name-input" />
   </form>
   <ProblemTable />
 </BaseLayout>
@@ -19,10 +22,9 @@ Astro.response.headers.set('Cache-Control', 's-maxage=86400, stale-while-revalid
 </style>
 
 <script>
-  const form = document.getElementById("handle-form") as HTMLFormElement;
-  const input = document.getElementById("handle-input") as HTMLInputElement;
+  const form = document.getElementById("name-form") as HTMLFormElement;
+  const input = document.getElementById("name-input") as HTMLInputElement;
   form.onsubmit = (ev) => {
-    console.log(input.value);
     if (input.value === "") location.href = "/";
     else location.href = `/solved/${input.value}`;
     return false;

@@ -22,16 +22,16 @@ const getToken = async (
     .then((r) => r.token);
 };
 
-const getIdFromHandle = async (cwoiHost: string, handle: string) => {
-  return fetch(`${cwoiHost}/api/user/info/handle/${handle}`)
+const getIdFromName = async (cwoiHost: string, name: string) => {
+  return fetch(`${cwoiHost}/api/user/info/handle/${name}`)
     .then((r) => r.json())
     .then((r) => r._id);
 };
 
-const getSolvedProblems = async (handle: string) => {
+const getSolvedProblems = async (name: string) => {
   const { CWOI_HOST, CWOI_NAME, CWOI_PASSWORD } = import.meta.env;
   const token = await getToken(CWOI_HOST, CWOI_NAME, CWOI_PASSWORD);
-  const id = await getIdFromHandle(CWOI_HOST, handle);
+  const id = await getIdFromName(CWOI_HOST, name);
 
   if (!id) throw new Error("User not found.");
 
@@ -55,16 +55,16 @@ const getSolvedProblems = async (handle: string) => {
     });
 };
 
-const { handle } = Astro.params;
+const { name } = Astro.params;
 let errorMessage: unknown;
-const solvedProblems = await getSolvedProblems(handle).catch((e) => {
+const solvedProblems = await getSolvedProblems(name).catch((e) => {
   errorMessage = e;
 });
 ---
 
 <BaseLayout>
-  <form id="handle-form">
-    <input placeholder="handle" id="handle-input" value={handle} />
+  <form id="name-form">
+    <input placeholder="名字" id="name-input" value={name} />
   </form>
   {errorMessage instanceof Error && <p class="red">{errorMessage.message}</p>}
   <ProblemTable solvedProblems={solvedProblems} />
@@ -81,8 +81,8 @@ const solvedProblems = await getSolvedProblems(handle).catch((e) => {
 </style>
 
 <script>
-  const form = document.getElementById("handle-form") as HTMLFormElement;
-  const input = document.getElementById("handle-input") as HTMLInputElement;
+  const form = document.getElementById("name-form") as HTMLFormElement;
+  const input = document.getElementById("name-input") as HTMLInputElement;
   form.onsubmit = (ev) => {
     console.log(input.value);
     if (input.value === "") location.href = "/";
