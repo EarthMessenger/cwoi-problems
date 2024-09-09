@@ -35,9 +35,7 @@ const solvedProblems: Set<string> = new Set(Astro.props.solvedProblems || []);
                         ) && "accept"
                       }
                     >
-                      <a
-                        href={`${CWOI_HOST}/contest/${c.contestDisplayId}/problem/${p.displayId}`}
-                      >
+                      <a href={`/problem/${p.problemId}`}>
                         {p.displayId}. {p.problemTitle}
                       </a>
                     </td>

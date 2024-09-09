@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import contests from "../../data/contests.json";
+
+const { CWOI_HOST } = import.meta.env;
+const { problemId } = Astro.params;
+
+interface ProblemExistenceInfo {
+  contestDisplayId: string;
+  contestTitle: string;
+  problemDisplayId: string;
+  problemTitle: string;
+}
+
+const problemExistence: ProblemExistenceInfo[] = [];
+
+for (let c of contests) {
+  for (let p of c.problems) {
+    if (p.problemId === problemId) {
+      problemExistence.push({
+        contestDisplayId: c.contestDisplayId,
+        contestTitle: c.contestTitle,
+        problemDisplayId: p.displayId,
+        problemTitle: p.problemTitle,
+      });
+    }
+  }
+}
+
+const problemTitles = [
+  ...new Set(problemExistence.map((p) => p.problemTitle)),
+].join("/");
+---
+
+<BaseLayout title={`${problemTitles}`}>
+  <h2>{problemTitles} 的所有出現</h2>
+
+  {
+    problemId === "ghost" && (
+      <p>註：這是 ghost 題目，所有沒有測試數據的題目都歸爲此類。</p>
+    )
+  }
+
+  <ul>
+    {
+      problemExistence.map((p) => (
+        <li>
+          <a
+            href={`${CWOI_HOST}/contest/${p.contestDisplayId}/problem/${p.problemDisplayId}`}
+          >
+            {p.contestDisplayId} {p.contestTitle} - {p.problemDisplayId}.
+            {p.problemTitle}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
