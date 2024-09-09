@@ -14,7 +14,7 @@ import requests
 logger = logging.getLogger(__name__)
 
 
-def base64_url_decode(s):
+def base64_url_decode(s: str):
     """
     append missing = at the end of the str, then call urlsafe base64, witch is
     used in jwt.
@@ -25,10 +25,33 @@ def base64_url_decode(s):
     return base64.urlsafe_b64decode(s)
 
 
-def get_jwt_exp(token):
+def get_jwt_exp(token: str):
     payload = token.split(".")[1]
     decoded = base64_url_decode(payload)
     return json.loads(decoded)["exp"]
+
+
+def remove_bracket(name: str):
+    """
+    remove beginning 【】
+
+    example:
+    >>> remove_bracket("【a】b")
+    'b'
+    >>> remove_bracket("a【a】b")
+    'a【a】b'
+    >>> remove_bracket("a【ab")
+    'a【ab'
+    >>> remove_bracket("【ab")
+    '【ab'
+    >>> remove_bracket("[a]b")
+    '[a]b'
+    """
+    if name[0] == "【":
+        right = name.find("】")
+        if right != -1:
+            name = name[right + 1 :]
+    return name.strip()
 
 
 class User:
@@ -96,10 +119,22 @@ class CwoiClient:
     def crawl_one_contest(self, _id: str, display_id: str):
         """
         crawl one contest and all the problem in it
-
         This fucking OJ uses two fucking different id to identify contest, fuck.
         """
 
+        data = res.json()
+        return {
+            "_id": data["_id"],
+            "contestDisplayId": data["contestDisplayId"],
+            "contestTitle": data["contestTitle"],
+            "problems": data["problems"],
+        }
+
+    def check_contest_permission(self, _id: str):
+        """
+        if user is root, don't use this.
+        check if user is in the contest, if not then vp it.
+        """
         res = requests.get(
             f"{self.cwoi}/api/contest/id/{_id}/inContest",
             headers=self.user.get_header(),
@@ -110,26 +145,42 @@ class CwoiClient:
                 headers=self.user.get_header(),
                 json={"vp": True},
             )
+
+    def crawl_contest_problems(self, display_id: str):
+        """
+        crawl contest problems title and judge config id.
+        """
+
         res = requests.get(
             f"{self.cwoi}/api/contest/displayid/{display_id}",
             headers=self.user.get_header(),
         )
         res.raise_for_status()
-        logger.info(f"crawled contest {display_id}.")
-        data = res.json()
-        return {
-            "_id": data["_id"],
-            "contestDisplayId": data["contestDisplayId"],
-            "contestTitle": data["contestTitle"],
-            "problems": data["problems"],
-            "startedAt": datetime.datetime.fromisoformat(data["startedAt"]).timestamp(),
-            "endedAt": datetime.datetime.fromisoformat(data["endedAt"]).timestamp(),
-            "groups": data["groups"],
-        }
+        raw_problems = res.json()["problems"]
+        problems = []
+        for p in raw_problems:
+            res = requests.get(
+                f"{self.cwoi}/api/contest/{display_id}/problem/{p['displayId']}",
+                headers=self.user.get_header(),
+            )
+            res.raise_for_status()
+            problem_info = res.json()
+            if problem_info["judgeConfig"]:
+                problem_id = problem_info["judgeConfig"]["problemId"]
+            else:
+                problem_id = "ghost"
+            problems.append(
+                {
+                    "displayId": p["displayId"],
+                    "problemTitle": remove_bracket(p["problemTitle"]),
+                    "problemId": problem_id,
+                }
+            )
+        return problems
 
     def crawl_contests(self):
         """
-        crawl contests after the lastest contest in the database
+        crawl all contests. assume that the contest list would not change while crawling.
         """
         tot_pages = 1
         current_page = 1
@@ -145,7 +196,31 @@ class CwoiClient:
             data = res.json()
             tot_pages = data["totalPages"]
             for i in data["rows"]:
-                contests.append(self.crawl_one_contest(i["_id"], i["contestDisplayId"]))
+                contest = {
+                    "_id": i["_id"],
+                    "contestDisplayId": i["contestDisplayId"],
+                    "contestTitle": i["contestTitle"],
+                    "startedAt": datetime.datetime.fromisoformat(
+                        i["startedAt"]
+                    ).timestamp(),
+                    "endedAt": datetime.datetime.fromisoformat(
+                        i["endedAt"]
+                    ).timestamp(),
+                    "groups": i["groups"],
+                    "problems": [],
+                }
+
+                if contest["endedAt"] <= datetime.datetime.now().timestamp():
+                    if self.user.name != "root":
+                        self.check_contest_permission(contest["_id"])
+                    contest["problems"] = self.crawl_contest_problems(
+                        contest["contestDisplayId"]
+                    )
+
+                contests.append(contest)
+
+                logger.info(f"crawled contest {contest['contestDisplayId']}.")
+
                 time.sleep(self.sleep)
             current_page += 1
             time.sleep(self.sleep)
@@ -172,8 +247,8 @@ def main():
         User(args.name, args.password, args.cwoi), args.cwoi, args.sleep
     )
 
-    res = client.crawl_contests()
-    print(json.dumps(res))
+    contests = client.crawl_contests()
+    print(json.dumps(contests))
 
 
 if __name__ == "__main__":
