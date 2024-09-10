@@ -1,6 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import contests from "../../data/contests.json";
+import { getSession } from "auth-astro/server";
+
+import Comment from "../../components/Comment.astro";
 
 const { CWOI_HOST } = import.meta.env;
 const { problemId } = Astro.params;
@@ -30,6 +33,8 @@ for (let c of contests) {
 const problemTitles = [
   ...new Set(problemExistence.map((p) => p.problemTitle)),
 ].join("/");
+
+const session = await getSession(Astro.request);
 ---
 
 <BaseLayout title={`${problemTitles}`}>
@@ -55,4 +60,13 @@ const problemTitles = [
       ))
     }
   </ul>
+
+  {
+    session && (
+      <>
+        <h2>評論</h2>
+        <Comment problemId={problemId} />
+      </>
+    )
+  }
 </BaseLayout>

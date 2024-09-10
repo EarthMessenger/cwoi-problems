@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly CWOI_PASSWORD: string,
 
   readonly AUTH_SECRET: string,
+
+  readonly POSTGRES_URL: string,
 };
 
 interface ImportMeta {

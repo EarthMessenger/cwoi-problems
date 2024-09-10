@@ -16,6 +16,7 @@
   "dependencies": {
     "@astrojs/vercel": "^7.8.0",
     "@auth/core": "^0.32.0",
+    "@vercel/postgres": "^0.10.0",
     "astro": "^4.15.4",
     "auth-astro": "^4.1.2",
     "zod": "^3.23.8"

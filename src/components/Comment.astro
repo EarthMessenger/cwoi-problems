@@ -1,0 +1,68 @@
+---
+import { pgPool } from "../db";
+import { getSession } from "auth-astro/server";
+
+interface Props {
+  problemId: string;
+}
+
+const session = await getSession(Astro.request);
+
+const { problemId } = Astro.props;
+
+const comments =
+  await pgPool.sql`SELECT * FROM comments WHERE problem_id = ${problemId};`;
+---
+
+<form class="comment">
+  <input name="problemId" value={problemId} type="hidden" />
+  <textarea name="comment"></textarea>
+  <input type="submit" value="評論" />
+</form>
+<ul>
+  {
+    comments.rows.map((c) => (
+      <li data-comment-id={c.id}>
+        <p>{c.content}</p>
+        <span>——{c.author}</span>
+        <time datetime={c.comment_time}>
+          {new Date(c.comment_time).toLocaleString()}
+        </time>
+        {c.author == session?.user.name && (
+          <button class="delete-button">刪除</button>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  import { actions } from "astro:actions";
+
+  const form = document.querySelectorAll(
+    ".comment",
+  ) as NodeListOf<HTMLFormElement>;
+  form.forEach((f) => {
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(f);
+      const { error } = await actions.postComment(data);
+      if (!error) location.reload();
+      else console.error(error);
+    });
+  });
+
+  const deleteButton = document.querySelectorAll(
+    ".delete-button",
+  ) as NodeListOf<HTMLButtonElement>;
+  deleteButton.forEach((b) => {
+    b.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const { error } = await actions.deleteComment({
+        id: parseInt(b.parentElement.dataset["commentId"]),
+      });
+      if (!error) location.reload();
+      else console.error(error);
+    });
+  });
+</script>
