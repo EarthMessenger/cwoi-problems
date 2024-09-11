@@ -1,0 +1,81 @@
+---
+import { getSession } from "auth-astro/server";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pgPool } from "../db";
+import contests from "../data/contests.json";
+
+const session = await getSession(Astro.request);
+
+if (!session) return Astro.redirect("/login");
+
+const query = Astro.url.searchParams.get("query") || "";
+
+interface SearchResult {
+  content: string;
+  author: string;
+  commentTime: Date;
+  problemId: string;
+  problemTitles: string[];
+}
+
+const search = async (query: string): Promise<SearchResult[]> => {
+  if (query === "") return [];
+  const queryString = `%${query.replace(/%/g, "\\%").replace(/_/g, "\\_")}%`;
+  const result =
+    await pgPool.sql`SELECT * FROM comments WHERE content ILIKE ${queryString}`;
+
+  const relatedProblems = new Set<string>(result.rows.map((r) => r.problem_id));
+  const problemTitles = new Map<string, string[]>();
+  for (const p of relatedProblems) {
+    problemTitles.set(p, []);
+  }
+  for (const c of contests) {
+    for (const p of c.problems) {
+      if (relatedProblems.has(p.problemId)) {
+        if (!problemTitles.has(p.problemId)) {
+          problemTitles.set(p.problemId, [p.problemTitle]);
+        } else {
+          problemTitles.get(p.problemId).push(p.problemTitle);
+        }
+      }
+    }
+  }
+  for (const p of relatedProblems) {
+    problemTitles.set(p, [...new Set(problemTitles.get(p))]);
+  }
+
+  return result.rows.map((r) => ({
+    content: r.content,
+    author: r.author,
+    commentTime: new Date(r.comment_time),
+    problemId: r.problem_id,
+    problemTitles: problemTitles.get(r.problem_id),
+  }));
+};
+
+const result = await search(query);
+---
+
+<BaseLayout title="搜索">
+  <h1>搜索</h1>
+  <form method="get">
+    <input name="query" type="search" value={query} />
+    <input type="submit" value="搜索" />
+  </form>
+  {
+    result.length !== 0 ? (
+      <ul>
+        {result.map((r) => (
+          <li>
+            <p>{r.content}</p>
+            <span>——{r.author}</span>
+            <time datetime={r.commentTime.toLocaleTimeString()}>
+              {new Date(r.commentTime).toLocaleString()}
+            </time>
+            <a href={`/problem/${r.problemId}`}>{r.problemTitles.join("/")}</a>
+          </li>
+        ))}
+      </ul>
+    ) : <p>無結果。</p>
+  }
+</BaseLayout>

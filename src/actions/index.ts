@@ -45,5 +45,5 @@ export const server = {
       }
       await pgPool.sql`DELETE FROM comments WHERE id = ${input.id};`;
     }
-  })
+  }),
 }

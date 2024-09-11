@@ -17,8 +17,8 @@ interface ProblemExistenceInfo {
 
 const problemExistence: ProblemExistenceInfo[] = [];
 
-for (let c of contests) {
-  for (let p of c.problems) {
+for (const c of contests) {
+  for (const p of c.problems) {
     if (p.problemId === problemId) {
       problemExistence.push({
         contestDisplayId: c.contestDisplayId,
