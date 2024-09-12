@@ -1,6 +1,7 @@
 ---
 import { pgPool } from "../db";
 import { getSession } from "auth-astro/server";
+import Datetime from "./Datetime.astro";
 
 interface Props {
   problemId: string;
@@ -25,9 +26,7 @@ const comments =
       <li data-comment-id={c.id}>
         <p>{c.content}</p>
         <span>——{c.author}</span>
-        <time datetime={c.comment_time}>
-          {new Date(c.comment_time).toLocaleString()}
-        </time>
+        <Datetime datetime={new Date(c.comment_time)} />
         {c.author == session?.user.name && (
           <button class="delete-button">刪除</button>
         )}

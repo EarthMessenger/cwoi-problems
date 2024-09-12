@@ -3,6 +3,7 @@ import { getSession } from "auth-astro/server";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pgPool } from "../db";
 import contests from "../data/contests.json";
+import Datetime from "../components/Datetime.astro";
 
 const session = await getSession(Astro.request);
 
@@ -69,13 +70,13 @@ const result = await search(query);
           <li>
             <p>{r.content}</p>
             <span>——{r.author}</span>
-            <time datetime={r.commentTime.toLocaleTimeString()}>
-              {new Date(r.commentTime).toLocaleString()}
-            </time>
+            <Datetime datetime={r.commentTime} />
             <a href={`/problem/${r.problemId}`}>{r.problemTitles.join("/")}</a>
           </li>
         ))}
       </ul>
-    ) : <p>無結果。</p>
+    ) : (
+      <p>無結果。</p>
+    )
   }
 </BaseLayout>

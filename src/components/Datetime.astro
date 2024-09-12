@@ -1,0 +1,16 @@
+---
+interface Props {
+  datetime: Date;
+}
+
+const { datetime } = Astro.props;
+---
+
+<time class="datetime" datetime={datetime.toISOString()}></time>
+
+<script>
+  const datetime = document.querySelectorAll<HTMLTimeElement>(".datetime");
+  datetime?.forEach((d) => {
+    d.innerText = new Date(d.dateTime).toLocaleString();
+  });
+</script>
