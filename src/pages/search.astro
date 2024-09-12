@@ -68,7 +68,7 @@ const result = await search(query);
       <ul>
         {result.map((r) => (
           <li>
-            <p>{r.content}</p>
+            <pre>{r.content}</pre>
             <span>——{r.author}</span>
             <Datetime datetime={r.commentTime} />
             <a href={`/problem/${r.problemId}`}>{r.problemTitles.join("/")}</a>

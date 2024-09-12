@@ -19,6 +19,14 @@
     "@vercel/postgres": "^0.10.0",
     "astro": "^4.15.4",
     "auth-astro": "^4.1.2",
+    "katex": "^0.16.11",
+    "rehype-katex": "^7.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-stringify": "^10.0.0",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.0",
+    "unified": "^11.0.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
