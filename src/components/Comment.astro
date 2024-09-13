@@ -71,8 +71,10 @@ const remark = unified()
       e.preventDefault();
       const data = new FormData(f);
       const { error } = await actions.postComment(data);
-      if (!error) location.reload();
-      else console.error(error);
+      if (!error) {
+        f.querySelector("textarea").value = "";
+        location.reload();
+      } else console.error(error);
     });
   });
 
