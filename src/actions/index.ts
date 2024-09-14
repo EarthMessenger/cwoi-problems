@@ -3,6 +3,8 @@ import { z } from "astro:schema";
 import { getSession } from "auth-astro/server";
 import { pgPool } from "../db";
 
+import { markdownParser } from "../unified";
+
 export const server = {
   postComment: defineAction({
     accept: "form",
@@ -46,4 +48,19 @@ export const server = {
       await pgPool.sql`DELETE FROM comments WHERE id = ${input.id};`;
     }
   }),
+  renderMarkdown: defineAction({
+    accept: "json",
+    input: z.object({
+      content: z.string()
+    }),
+    handler: async (input, ctx) => {
+      const session = await getSession(ctx.request);
+      if (!session) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+        })
+      }
+      return (await markdownParser.process(input.content)).toString();
+    }
+  })
 }

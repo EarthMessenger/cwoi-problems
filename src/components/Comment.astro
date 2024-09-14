@@ -3,13 +3,7 @@ import { pgPool } from "../db";
 import { getSession } from "auth-astro/server";
 import Datetime from "./Datetime.astro";
 
-import { unified } from "unified";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
-import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
+import { markdownParser } from "../unified";
 
 import "katex/dist/katex.css";
 
@@ -23,33 +17,20 @@ const { problemId } = Astro.props;
 
 const comments =
   await pgPool.sql`SELECT * FROM comments WHERE problem_id = ${problemId};`;
-
-const remark = unified()
-  .use(remarkParse)
-  .use(remarkMath)
-  .use(remarkRehype)
-  .use(rehypeSanitize, {
-    ...defaultSchema,
-    attributes: {
-      ...defaultSchema.attributes,
-      // The `language-*` regex is allowed by default.
-      code: [["className", /^language-./, "math-inline", "math-display"]],
-    },
-  })
-  .use(rehypeKatex)
-  .use(rehypeStringify);
 ---
 
 <form class="comment">
   <input name="problemId" value={problemId} type="hidden" />
   <textarea name="comment"></textarea>
   <input type="submit" value="評論" />
+  <input class="preview-button" type="button" value="預覽" />
+  <div class="preview-div"></div>
 </form>
 <ul>
   {
     comments.rows.map((c) => (
       <li data-comment-id={c.id}>
-        <article set:html={remark.processSync(c.content)} />
+        <article set:html={markdownParser.processSync(c.content)} />
         <span>——{c.author}</span>
         <Datetime datetime={new Date(c.comment_time)} />
         {c.author == session?.user.name && (
@@ -76,6 +57,20 @@ const remark = unified()
         location.reload();
       } else console.error(error);
     });
+    f.querySelector<HTMLButtonElement>(".preview-button").addEventListener(
+      "click",
+      async (e) => {
+        e.preventDefault();
+        const { data, error } = await actions.renderMarkdown({
+          content: f.querySelector("textarea").value,
+        });
+        if (!error) {
+          f.querySelector(".preview-div").innerHTML = data;
+        } else {
+          console.error(error);
+        }
+      },
+    );
   });
 
   const deleteButton = document.querySelectorAll(
