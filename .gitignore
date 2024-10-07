@@ -7,3 +7,5 @@ node_modules/
 .astro/
 .vercel
 .env*.local
+
+latest_contests.json
