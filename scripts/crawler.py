@@ -25,10 +25,10 @@ def base64_url_decode(s: str):
     return base64.urlsafe_b64decode(s)
 
 
-def get_jwt_exp(token: str):
+def parse_jwt_payload(token: str):
     payload = token.split(".")[1]
     decoded = base64_url_decode(payload)
-    return json.loads(decoded)["exp"]
+    return json.loads(decoded)
 
 
 def remove_bracket(name: str):
@@ -64,11 +64,14 @@ class User:
         self.name = name
         self.password = password
         self.token = ""
+        self.type = None
         self.exp_timestamp = 0.0
         self.login()
 
-    def update_exp(self):
-        self.exp_timestamp = get_jwt_exp(self.token)
+    def parse_token(self):
+        payload = parse_jwt_payload(self.token)
+        self.exp_timestamp = payload["exp"]
+        self.type = payload["type"]
 
     def login(self):
         req = requests.post(
@@ -77,7 +80,7 @@ class User:
         )
         req.raise_for_status()
         self.token = req.json()["token"]
-        self.update_exp()
+        self.parse_token()
         logger.warning(f"login as {self.name}.")
 
     def renew(self):
@@ -87,7 +90,7 @@ class User:
         )
         req.raise_for_status()
         self.token = req.json()["token"]
-        self.update_exp()
+        self.parse_token()
         logger.info(f"renew {self.name}'s token, exp: {self.exp_timestamp}")
 
     def get_token(self):
@@ -116,20 +119,6 @@ class CwoiClient:
         self.cwoi = cwoi
         self.sleep = sleep
 
-    def crawl_one_contest(self, _id: str, display_id: str):
-        """
-        crawl one contest and all the problem in it
-        This fucking OJ uses two fucking different id to identify contest, fuck.
-        """
-
-        data = res.json()
-        return {
-            "_id": data["_id"],
-            "contestDisplayId": data["contestDisplayId"],
-            "contestTitle": data["contestTitle"],
-            "problems": data["problems"],
-        }
-
     def check_contest_permission(self, _id: str):
         """
         if user is root, don't use this.
@@ -140,6 +129,8 @@ class CwoiClient:
             headers=self.user.get_header(),
         )
         if res.text == "false":
+            logger.warning(f"vp contest {_id}")
+
             res = requests.post(
                 f"{self.cwoi}/api/contest/{_id}/join",
                 headers=self.user.get_header(),
@@ -211,7 +202,7 @@ class CwoiClient:
                 }
 
                 if contest["endedAt"] <= datetime.datetime.now().timestamp():
-                    if self.user.name != "root":
+                    if self.user.type != "Admin":
                         self.check_contest_permission(contest["_id"])
                     contest["problems"] = self.crawl_contest_problems(
                         contest["contestDisplayId"]
