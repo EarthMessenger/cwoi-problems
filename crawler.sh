@@ -1,4 +1,8 @@
 #!/usr/bin/bash
+
+set -e
+set -o pipefail
+
 . .env.local
 
 python scripts/crawler.py ${CWOI_NAME} ${CWOI_PASSWORD} ${CWOI_HOST} --sleep 0 > ./latest_crawl.json
